@@ -1,5 +1,7 @@
 """FastAPI dependencies (DB session, auth, pagination)."""
 
+from __future__ import annotations
+
 import uuid
 from typing import Annotated
 
@@ -10,8 +12,11 @@ from app.core.logging import get_logger
 from app.db.session import get_db
 from app.exceptions.errors import UnauthorizedError
 from app.models.user import User
-from app.utils.jwt_utils import (TokenExpiredError, TokenValidationError,
-                                 decode_access_token)
+from app.utils.jwt_utils import (
+    TokenExpiredError,
+    TokenValidationError,
+    decode_access_token,
+)
 
 DbSession = Annotated[Session, Depends(get_db)]
 logger = get_logger(__name__)

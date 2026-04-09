@@ -1,5 +1,7 @@
 """Repository helpers for project workflows."""
 
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import func, or_, select
@@ -122,7 +124,8 @@ def get_project_task_stats(
 
     counts_by_status = {"todo": 0, "in_progress": 0, "done": 0}
     for status_value, count in status_rows:
-        counts_by_status[str(status_value)] = int(count)
+        status_key = getattr(status_value, "value", str(status_value))
+        counts_by_status[status_key] = int(count)
 
     assignee_rows = db.execute(
         select(Task.assignee_id, User.name, func.count(Task.id))

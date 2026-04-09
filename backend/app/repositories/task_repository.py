@@ -1,5 +1,7 @@
 """Repository helpers for task workflows."""
 
+from __future__ import annotations
+
 from datetime import date, datetime, timezone
 from typing import Any
 from uuid import UUID

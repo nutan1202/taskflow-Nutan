@@ -6,15 +6,22 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response, status
 
 from app.api.deps import CurrentUser, DbSession
-from app.schemas.project import (CreateProjectRequest, ProjectDetailResponse,
-                                 ProjectListResponse, ProjectResponse,
-                                 ProjectStatsResponse, UpdateProjectRequest)
-from app.services.project_service import (create_project_for_user,
-                                          delete_project_for_user,
-                                          get_project_details_for_user,
-                                          get_project_stats_for_user,
-                                          list_projects_for_user,
-                                          update_project_for_user)
+from app.schemas.project import (
+    CreateProjectRequest,
+    ProjectDetailResponse,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectStatsResponse,
+    UpdateProjectRequest,
+)
+from app.services.project_service import (
+    create_project_for_user,
+    delete_project_for_user,
+    get_project_details_for_user,
+    get_project_stats_for_user,
+    list_projects_for_user,
+    update_project_for_user,
+)
 
 router = APIRouter()
 

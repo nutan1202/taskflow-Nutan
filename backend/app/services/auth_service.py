@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.exceptions import UnauthorizedError, ValidationFailedError
 from app.repositories.auth_repository import create_user, get_user_by_email
-from app.schemas.auth import (AuthResponse, LoginRequest, RegisterRequest,
-                              UserResponse)
+from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, UserResponse
 from app.utils.jwt_utils import create_access_token
 from app.utils.password import hash_password, verify_password
 

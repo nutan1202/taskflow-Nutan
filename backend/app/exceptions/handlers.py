@@ -5,8 +5,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.core.logging import get_logger
-from app.exceptions.errors import (AppError, ForbiddenError, NotFoundError,
-                                   UnauthorizedError, ValidationFailedError)
+from app.exceptions.errors import (
+    AppError,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+    ValidationFailedError,
+)
 
 logger = get_logger(__name__)
 
