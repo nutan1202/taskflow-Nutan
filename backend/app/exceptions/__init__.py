@@ -5,6 +5,13 @@ from app.exceptions.errors import (
     ForbiddenError,
     NotFoundError,
     UnauthorizedError,
+    ValidationFailedError,
 )
 
-__all__ = ["AppError", "UnauthorizedError", "ForbiddenError", "NotFoundError"]
+__all__ = [
+    "AppError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "NotFoundError",
+    "ValidationFailedError",
+]

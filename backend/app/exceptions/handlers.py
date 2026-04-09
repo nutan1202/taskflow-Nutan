@@ -9,6 +9,7 @@ from app.exceptions.errors import (
     ForbiddenError,
     NotFoundError,
     UnauthorizedError,
+    ValidationFailedError,
 )
 
 
@@ -55,6 +56,16 @@ def register_exception_handlers(app: FastAPI) -> None:
         _exc: NotFoundError,
     ) -> JSONResponse:
         return JSONResponse(status_code=404, content={"error": "not found"})
+
+    @app.exception_handler(ValidationFailedError)
+    async def validation_failed_exception_handler(
+        _request: Request,
+        exc: ValidationFailedError,
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "validation failed", "fields": exc.fields},
+        )
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(

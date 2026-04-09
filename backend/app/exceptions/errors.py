@@ -21,3 +21,12 @@ class ForbiddenError(AppError):
 class NotFoundError(AppError):
     status_code = 404
     error = "not found"
+
+
+class ValidationFailedError(AppError):
+    status_code = 400
+    error = "validation failed"
+
+    def __init__(self, fields: dict[str, str]):
+        super().__init__("validation failed")
+        self.fields = fields
