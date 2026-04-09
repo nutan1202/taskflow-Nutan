@@ -52,3 +52,15 @@ class ProjectListResponse(BaseModel):
     page: int
     limit: int
     total: int
+
+
+class AssigneeTaskCount(BaseModel):
+    assignee_id: UUID | None
+    assignee_name: str | None
+    count: int
+
+
+class ProjectStatsResponse(BaseModel):
+    project_id: UUID
+    counts_by_status: dict[str, int]
+    counts_by_assignee: list[AssigneeTaskCount]

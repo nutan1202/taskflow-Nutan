@@ -4,8 +4,10 @@ from app.repositories.auth_repository import create_user, get_user_by_email
 from app.repositories.project_repository import (
     create_project,
     delete_project,
+    get_accessible_project,
     get_accessible_project_with_tasks,
     get_project_by_id,
+    get_project_task_stats,
     list_accessible_projects,
     update_project,
 )
@@ -27,7 +29,9 @@ __all__ = [
     "list_accessible_projects",
     "create_project",
     "get_project_by_id",
+    "get_accessible_project",
     "get_accessible_project_with_tasks",
+    "get_project_task_stats",
     "update_project",
     "delete_project",
     "get_user_by_id",

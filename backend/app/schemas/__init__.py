@@ -2,10 +2,12 @@
 
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, UserResponse
 from app.schemas.project import (
+    AssigneeTaskCount,
     CreateProjectRequest,
     ProjectDetailResponse,
     ProjectListResponse,
     ProjectResponse,
+    ProjectStatsResponse,
     UpdateProjectRequest,
 )
 from app.schemas.task_api import (
@@ -25,6 +27,8 @@ __all__ = [
     "ProjectResponse",
     "ProjectDetailResponse",
     "ProjectListResponse",
+    "AssigneeTaskCount",
+    "ProjectStatsResponse",
     "CreateTaskRequest",
     "UpdateTaskRequest",
     "TaskResponse",

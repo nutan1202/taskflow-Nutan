@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.project import Project
 from app.models.task import Task
+from app.models.user import User
 
 
 def list_accessible_projects(
@@ -84,6 +85,65 @@ def get_accessible_project_with_tasks(
         .distinct()
     )
     return db.execute(stmt).scalar_one_or_none()
+
+
+def get_accessible_project(
+    db: Session,
+    *,
+    project_id: UUID,
+    user_id: UUID,
+) -> Project | None:
+    stmt = (
+        select(Project)
+        .outerjoin(Task, Task.project_id == Project.id)
+        .where(
+            Project.id == project_id,
+            or_(
+                Project.owner_id == user_id,
+                Task.assignee_id == user_id,
+                Task.creator_id == user_id,
+            ),
+        )
+        .distinct()
+    )
+    return db.execute(stmt).scalar_one_or_none()
+
+
+def get_project_task_stats(
+    db: Session,
+    *,
+    project_id: UUID,
+) -> tuple[dict[str, int], list[dict[str, object]]]:
+    status_rows = db.execute(
+        select(Task.status, func.count(Task.id))
+        .where(Task.project_id == project_id)
+        .group_by(Task.status)
+    ).all()
+
+    counts_by_status = {"todo": 0, "in_progress": 0, "done": 0}
+    for status_value, count in status_rows:
+        counts_by_status[str(status_value)] = int(count)
+
+    assignee_rows = db.execute(
+        select(Task.assignee_id, User.name, func.count(Task.id))
+        .select_from(Task)
+        .outerjoin(User, User.id == Task.assignee_id)
+        .where(Task.project_id == project_id)
+        .group_by(Task.assignee_id, User.name)
+        .order_by(func.count(Task.id).desc(), User.name.asc().nullsfirst())
+    ).all()
+
+    counts_by_assignee: list[dict[str, object]] = []
+    for assignee_id, assignee_name, count in assignee_rows:
+        counts_by_assignee.append(
+            {
+                "assignee_id": assignee_id,
+                "assignee_name": assignee_name,
+                "count": int(count),
+            }
+        )
+
+    return counts_by_status, counts_by_assignee
 
 
 def update_project(

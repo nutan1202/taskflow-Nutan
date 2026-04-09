@@ -6,14 +6,22 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Response, status
 
 from app.api.deps import CurrentUser, DbSession
-from app.schemas.project import (CreateProjectRequest, ProjectDetailResponse,
-                                 ProjectListResponse, ProjectResponse,
-                                 UpdateProjectRequest)
-from app.services.project_service import (create_project_for_user,
-                                          delete_project_for_user,
-                                          get_project_details_for_user,
-                                          list_projects_for_user,
-                                          update_project_for_user)
+from app.schemas.project import (
+    CreateProjectRequest,
+    ProjectDetailResponse,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectStatsResponse,
+    UpdateProjectRequest,
+)
+from app.services.project_service import (
+    create_project_for_user,
+    delete_project_for_user,
+    get_project_details_for_user,
+    get_project_stats_for_user,
+    list_projects_for_user,
+    update_project_for_user,
+)
 
 router = APIRouter()
 
@@ -40,6 +48,19 @@ def create_project_endpoint(
     current_user: CurrentUser,
 ) -> ProjectResponse:
     return create_project_for_user(db, user=current_user, payload=payload)
+
+
+@router.get(
+    "/{project_id}/stats",
+    response_model=ProjectStatsResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_project_stats(
+    project_id: UUID,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> ProjectStatsResponse:
+    return get_project_stats_for_user(db, project_id=project_id, user=current_user)
 
 
 @router.get(

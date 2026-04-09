@@ -9,16 +9,20 @@ from app.models.user import User
 from app.repositories.project_repository import (
     create_project,
     delete_project,
+    get_accessible_project,
     get_accessible_project_with_tasks,
     get_project_by_id,
+    get_project_task_stats,
     list_accessible_projects,
     update_project,
 )
 from app.schemas.project import (
+    AssigneeTaskCount,
     CreateProjectRequest,
     ProjectDetailResponse,
     ProjectListResponse,
     ProjectResponse,
+    ProjectStatsResponse,
     UpdateProjectRequest,
 )
 
@@ -109,3 +113,28 @@ def delete_project_for_user(
     if project.owner_id != user.id:
         raise ForbiddenError()
     delete_project(db, project)
+
+
+def get_project_stats_for_user(
+    db: Session,
+    *,
+    project_id: UUID,
+    user: User,
+) -> ProjectStatsResponse:
+    project = get_accessible_project(
+        db,
+        project_id=project_id,
+        user_id=user.id,
+    )
+    if project is None:
+        raise NotFoundError()
+
+    counts_by_status, counts_by_assignee = get_project_task_stats(
+        db,
+        project_id=project_id,
+    )
+    return ProjectStatsResponse(
+        project_id=project_id,
+        counts_by_status=counts_by_status,
+        counts_by_assignee=[AssigneeTaskCount(**row) for row in counts_by_assignee],
+    )
