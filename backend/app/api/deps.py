@@ -7,6 +7,7 @@ from fastapi import Depends, Header
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.exceptions.errors import UnauthorizedError
 from app.models.user import User
 from app.utils.jwt_utils import (
     TokenExpiredError,
@@ -15,10 +16,6 @@ from app.utils.jwt_utils import (
 )
 
 DbSession = Annotated[Session, Depends(get_db)]
-
-
-class UnauthorizedError(Exception):
-    """Raised when request authentication is missing or invalid."""
 
 
 def _raise_unauthorized() -> None:
