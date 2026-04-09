@@ -2,26 +2,16 @@
 
 from app.repositories.auth_repository import create_user, get_user_by_email
 from app.repositories.project_repository import (
-    create_project,
-    delete_project,
-    get_accessible_project,
-    get_accessible_project_with_tasks,
-    get_project_by_id,
-    get_project_task_stats,
-    list_accessible_projects,
-    update_project,
-)
-from app.repositories.task_repository import (
-    can_access_project_tasks,
-    create_task,
-    delete_task,
-    get_project_for_tasks_by_id,
-    get_task_by_id,
-    get_task_with_project_by_id,
-    get_user_by_id,
-    list_project_tasks,
-    update_task,
-)
+    create_project, delete_project, get_accessible_project,
+    get_accessible_project_with_tasks, get_project_by_id,
+    get_project_task_stats, list_accessible_projects, update_project)
+from app.repositories.task_repository import (can_access_project_tasks,
+                                              create_task, delete_task,
+                                              get_project_for_tasks_by_id,
+                                              get_task_by_id,
+                                              get_task_with_project_by_id,
+                                              get_user_by_id,
+                                              list_project_tasks, update_task)
 
 __all__ = [
     "get_user_by_email",
