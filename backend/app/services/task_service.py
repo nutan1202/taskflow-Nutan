@@ -7,14 +7,22 @@ from sqlalchemy.orm import Session
 from app.exceptions import ForbiddenError, NotFoundError, ValidationFailedError
 from app.models.task import Task, TaskStatus
 from app.models.user import User
-from app.repositories.task_repository import (can_access_project_tasks,
-                                              create_task, delete_task,
-                                              get_project_for_tasks_by_id,
-                                              get_task_with_project_by_id,
-                                              get_user_by_id,
-                                              list_project_tasks, update_task)
-from app.schemas.task_api import (CreateTaskRequest, TaskListResponse,
-                                  TaskResponse, UpdateTaskRequest)
+from app.repositories.task_repository import (
+    can_access_project_tasks,
+    create_task,
+    delete_task,
+    get_project_for_tasks_by_id,
+    get_task_with_project_by_id,
+    get_user_by_id,
+    list_project_tasks,
+    update_task,
+)
+from app.schemas.task_api import (
+    CreateTaskRequest,
+    TaskListResponse,
+    TaskResponse,
+    UpdateTaskRequest,
+)
 
 
 def _can_view_project_tasks(*, user: User, project_id: UUID, db: Session) -> bool:

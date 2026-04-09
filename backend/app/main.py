@@ -11,6 +11,7 @@ from app.core.logging import get_logger, setup_logging
 from app.db.session import engine
 from app.exceptions.handlers import register_exception_handlers
 from app.middleware.request_context import RequestContextMiddleware
+from app.middleware.request_logging import RequestLoggingMiddleware
 
 logger = get_logger(__name__)
 
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(RequestLoggingMiddleware)
     register_exception_handlers(app)
     app.include_router(api_router)
     return app
