@@ -7,13 +7,24 @@ from sqlalchemy.orm import Session
 from app.exceptions import ForbiddenError, NotFoundError
 from app.models.user import User
 from app.repositories.project_repository import (
-    create_project, delete_project, get_accessible_project,
-    get_accessible_project_with_tasks, get_project_by_id,
-    get_project_task_stats, list_accessible_projects, update_project)
-from app.schemas.project import (AssigneeTaskCount, CreateProjectRequest,
-                                 ProjectDetailResponse, ProjectListResponse,
-                                 ProjectResponse, ProjectStatsResponse,
-                                 UpdateProjectRequest)
+    create_project,
+    delete_project,
+    get_accessible_project,
+    get_accessible_project_with_tasks,
+    get_project_by_id,
+    get_project_task_stats,
+    list_accessible_projects,
+    update_project,
+)
+from app.schemas.project import (
+    AssigneeTaskCount,
+    CreateProjectRequest,
+    ProjectDetailResponse,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectStatsResponse,
+    UpdateProjectRequest,
+)
 
 
 def list_projects_for_user(

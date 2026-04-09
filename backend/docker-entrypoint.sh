@@ -14,5 +14,7 @@ else:
     raise SystemExit("database not reachable")
 PY
 alembic upgrade head
-# When seed exists: psql or python -m app.scripts.seed
+if [ "${RUN_DB_SEED:-true}" = "true" ]; then
+  python scripts/seed.py
+fi
 exec uvicorn app.main:app --host "${API_HOST:-0.0.0.0}" --port "${API_PORT:-8000}"

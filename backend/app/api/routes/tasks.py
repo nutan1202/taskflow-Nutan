@@ -7,18 +7,12 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.api.deps import CurrentUser, DbSession
 from app.models.task import TaskStatus
-from app.schemas.task_api import (
-    CreateTaskRequest,
-    TaskListResponse,
-    TaskResponse,
-    UpdateTaskRequest,
-)
-from app.services.task_service import (
-    create_task_in_project,
-    delete_task_for_user,
-    list_tasks_for_project,
-    update_task_for_user,
-)
+from app.schemas.task_api import (CreateTaskRequest, TaskListResponse,
+                                  TaskResponse, UpdateTaskRequest)
+from app.services.task_service import (create_task_in_project,
+                                       delete_task_for_user,
+                                       list_tasks_for_project,
+                                       update_task_for_user)
 
 router = APIRouter()
 
