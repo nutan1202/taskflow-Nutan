@@ -1,0 +1,7 @@
+-- Idempotent seed for local / review (run after migrations from entrypoint or manually).
+-- Replace placeholders once users/projects/tasks tables exist.
+--
+-- Example:
+-- INSERT INTO users (id, name, email, password_hash, created_at) VALUES
+--   ('...', 'Test User', 'test@example.com', '<bcrypt hash>', now())
+-- ON CONFLICT DO NOTHING;
