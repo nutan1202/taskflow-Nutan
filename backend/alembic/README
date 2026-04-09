@@ -1,0 +1,7 @@
+Alembic migrations live in `versions/`. Generate new revisions with:
+
+  alembic revision --autogenerate -m "description"
+
+Apply:
+
+  alembic upgrade head
