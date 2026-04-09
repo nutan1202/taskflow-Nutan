@@ -13,7 +13,7 @@ from app.core.config import get_settings
 class TokenClaims:
     """Validated claims extracted from an access token."""
 
-    user_id: int
+    user_id: str
     email: str
     exp: int
     iat: int
@@ -29,7 +29,7 @@ class TokenExpiredError(TokenValidationError):
 
 def create_access_token(
     *,
-    user_id: int,
+    user_id: str,
     email: str,
     expires_in_hours: int | None = None,
 ) -> str:
@@ -40,8 +40,8 @@ def create_access_token(
     - user_id
     - email
     """
-    if user_id <= 0:
-        raise ValueError("user_id must be a positive integer.")
+    if not user_id:
+        raise ValueError("user_id must be a non-empty string.")
     if not email or "@" not in email:
         raise ValueError("email must be a valid non-empty email address.")
 
@@ -93,7 +93,7 @@ def decode_access_token(token: str) -> TokenClaims:
     exp = payload.get("exp")
     iat = payload.get("iat")
 
-    if not isinstance(user_id, int) or user_id <= 0:
+    if not isinstance(user_id, str) or not user_id:
         raise TokenValidationError("Token missing valid user_id claim.")
     if not isinstance(email, str) or not email:
         raise TokenValidationError("Token missing valid email claim.")
