@@ -20,7 +20,6 @@ api_router.include_router(
 )
 api_router.include_router(
     tasks.router,
-    prefix="/tasks",
     tags=["tasks"],
     dependencies=[Depends(get_current_user)],
 )
