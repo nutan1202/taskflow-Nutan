@@ -1,30 +1,27 @@
-# TaskFlow (Backend-only Submission)
+# TaskFlow (Backend-Only Submission)
 
 ## 1. Overview
-TaskFlow is a backend-only task management API built with FastAPI, SQLAlchemy, Alembic, and PostgreSQL.
+This submission is **backend-only** and implements the TaskFlow API using FastAPI, PostgreSQL, SQLAlchemy 2.0, Alembic, and Docker Compose.
 
-Implemented backend scope for this assignment:
-- JWT auth foundation with bcrypt password utilities and token helpers.
-- Core data model (`users`, `projects`, `tasks`) via Alembic migration.
-- Centralized JSON error handling with required 400/401/403/404 contracts.
-- Dockerized API + PostgreSQL setup with migration-on-start behavior.
-- Seed SQL and basic API test scaffold.
-
-Tech stack:
-- Python 3.12, FastAPI, SQLAlchemy 2, Alembic, PostgreSQL 16, Docker Compose.
+Scope included in this submission:
+- JWT-based authentication (`register`, `login`, bearer-protected business routes)
+- Project APIs (list, create, detail, update, delete)
+- Task APIs (list/create under project, update/delete by task id)
+- Project stats API (`GET /projects/{project_id}/stats`)
+- Standardized JSON error contracts (`400`, `401`, `403`, `404`)
+- Containerized startup with automatic migration + seed flow
+- Structured JSON logging and graceful shutdown behavior for container runtime
 
 ## 2. Architecture Decisions
-- Layered backend structure (`api`, `core`, `db`, `models`, `utils`, `exceptions`) to keep concerns separated.
-- Strongly validated env config in one place (`app/core/config.py`) using `pydantic-settings`.
-- Centralized exception mapping to enforce consistent API contracts.
-- UUID primary keys and explicit foreign keys/indexes for data integrity and query performance.
-- Docker uses a multi-stage API image build for a smaller runtime image.
-
-Tradeoffs and current limitations:
-- Auth dependencies, JWT utilities, and exception contracts are implemented, but full CRUD business flows are still scaffold-level for some endpoints.
-- Seed file is SQL-first for reviewer setup speed instead of app-level seed orchestration.
+- **FastAPI over Go for this submission:** I chose FastAPI for faster delivery in the assignment timebox, strong request/response validation with Pydantic, and built-in OpenAPI docs. Go remains a strong production option, but FastAPI gave a faster path to a complete and reviewable API here.
+- **SQLAlchemy 2.0 + Alembic:** SQLAlchemy 2.0 gives explicit ORM patterns; Alembic provides reproducible, versioned schema changes.
+- **PostgreSQL:** The `users/projects/tasks` relational model benefits from PostgreSQL constraints, enum support, and query behavior.
+- **Layered structure:** Routes -> Services -> Repositories separates HTTP, business logic, and data access.
+- **Docker Compose first:** Reviewer can run the backend with Docker only.
 
 ## 3. Running Locally
+Assumption: reviewer has **Docker + Docker Compose** installed.
+
 ```bash
 git clone https://github.com/nutan1202/taskflow-Nutan
 cd taskflow-Nutan
@@ -32,73 +29,302 @@ cp .env.example .env
 docker compose up --build
 ```
 
-API base URL:
+What `docker compose up --build` does:
+- Starts `db` (PostgreSQL 16)
+- Builds and starts `api` (FastAPI)
+- `api` entrypoint waits for DB, runs migrations, optionally seeds, then starts Uvicorn
+
+Useful follow-up commands:
+```bash
+# stop services
+docker compose down
+
+# stop and remove DB volume (fresh DB next run)
+docker compose down -v
+```
+
+Base URL after startup:
 - `http://localhost:8000`
 
-Notes:
-- This backend-only submission does not include a React frontend.
-- API and DB are started by `docker compose up`.
+Interactive API docs after startup:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+Auth model:
+- `POST /auth/register` and `POST /auth/login` are public
+- `GET /health` is public
+- All project/task/stats business endpoints require `Authorization: Bearer <token>`
 
 ## 4. Running Migrations
-Migrations run automatically on API container startup via `backend/docker-entrypoint.sh`.
+Automatic behavior on container start:
+- `alembic upgrade head` runs from `backend/docker-entrypoint.sh`
 
-Manual migration commands:
+Manual migration commands (inside running API container):
 ```bash
+# apply latest migrations
 docker compose exec api alembic upgrade head
+
+# rollback one migration
 docker compose exec api alembic downgrade -1
 ```
 
-## 5. Test Credentials
-Seed credentials (from `backend/scripts/seed.sql`):
+Seed behavior:
+- Controlled by `RUN_DB_SEED` in `.env` (default `true`)
+- When enabled, `python scripts/seed.py` runs on startup
+- Seed script is idempotent (safe across restarts; inserts only when missing)
 
-```
-Email:    test@example.com
-Password: password123
-```
+## 5. Test Credentials
+Use these seeded credentials for reviewer login:
+
+- Email: `test@example.com`
+- Password: `password123`
 
 ## 6. API Reference
-Authentication:
-- `POST /auth/register`
-- `POST /auth/login`
+All responses are JSON.
 
-Projects:
-- `GET /projects`
-- `POST /projects`
-- `GET /projects/:id`
-- `PATCH /projects/:id`
-- `DELETE /projects/:id`
+### Authorization Rules
+- All project/task/stats business endpoints require bearer authentication.
+- Project update/delete is owner-only.
+- Project detail, task listing, and project stats are accessible to users who own the project or have task membership in it.
+- Task delete is allowed only for project owner or task creator.
 
-Tasks:
-- `GET /projects/:id/tasks?status=&assignee=`
-- `POST /projects/:id/tasks`
-- `PATCH /tasks/:id`
-- `DELETE /tasks/:id`
+### Authentication
+1. `POST /auth/register`
+- Request:
+```json
+{
+  "name": "Reviewer User",
+  "email": "reviewer@example.com",
+  "password": "password123"
+}
+```
+- Response `201`:
+```json
+{
+  "token": "<jwt>",
+  "user": {
+    "id": "uuid",
+    "name": "Reviewer User",
+    "email": "reviewer@example.com",
+    "created_at": "2026-04-10T00:00:00Z"
+  }
+}
+```
 
-Health:
-- `GET /health`
+2. `POST /auth/login`
+- Request:
+```json
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+```
+- Response `200`: same shape as register
 
-Error response contracts:
-- `400` validation:
-  - `{ "error": "validation failed", "fields": { "email": "is required" } }`
-- `401` unauthenticated:
-  - `{ "error": "unauthorized" }`
-- `403` forbidden:
-  - `{ "error": "forbidden" }`
-- `404` not found:
-  - `{ "error": "not found" }`
+### Health
+1. `GET /health` (public)
+- Response `200`:
+```json
+{ "status": "ok" }
+```
 
-Backend-only evidence requirement:
-- Test suite exists in `backend/tests/` as required alternative to frontend.
+### Projects
+1. `GET /projects`
+- Query params:
+  - `page` (default `1`, min `1`)
+  - `limit` (default `20`, min `1`, max `100`)
+- Response `200`:
+```json
+{
+  "projects": [
+    {
+      "id": "uuid",
+      "name": "TaskFlow Demo Project",
+      "description": "Seeded project for reviewer testing",
+      "owner_id": "uuid",
+      "created_at": "2026-04-10T00:00:00Z"
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 1
+}
+```
 
-## 7. What You'd Do With More Time
-- Complete and harden all auth/project/task endpoint business logic end-to-end.
-- Add integration tests for auth and task lifecycle flows (minimum 3, including failure paths).
-- Add pagination and project stats endpoint (`GET /projects/:id/stats`).
-- Add request/response schemas for stricter API contracts and OpenAPI examples.
-- Add CI pipeline for lint/test/build gates on pull requests.
+2. `POST /projects`
+- Request:
+```json
+{
+  "name": "Sprint Alpha",
+  "description": "Execution board"
+}
+```
+- Response `201`:
+```json
+{
+  "id": "uuid",
+  "name": "Sprint Alpha",
+  "description": "Execution board",
+  "owner_id": "uuid",
+  "created_at": "2026-04-10T00:00:00Z"
+}
+```
 
-## Environment Files
-- `.env.example` (root): canonical Docker Compose + API runtime variables.
-- `backend/.env.backend.example`: backend-only local run without Docker Compose.
+3. `GET /projects/{project_id}`
+- Response `200`:
+```json
+{
+  "id": "uuid",
+  "name": "Sprint Alpha",
+  "description": "Execution board",
+  "owner_id": "uuid",
+  "created_at": "2026-04-10T00:00:00Z",
+  "tasks": [
+    {
+      "id": "uuid",
+      "title": "Task A",
+      "description": null,
+      "status": "todo",
+      "priority": "medium",
+      "project_id": "uuid",
+      "assignee_id": "uuid",
+      "due_date": null,
+      "created_at": "2026-04-10T00:00:00Z",
+      "updated_at": "2026-04-10T00:00:00Z"
+    }
+  ]
+}
+```
 
-Both files are template-only; do not commit `.env` files or real secrets.
+4. `PATCH /projects/{project_id}`
+- Request (partial update allowed):
+```json
+{
+  "name": "Sprint Alpha (Updated)",
+  "description": "Updated description"
+}
+```
+- Response `200`: updated project object
+
+5. `DELETE /projects/{project_id}`
+- Response `204` (no body)
+
+6. `GET /projects/{project_id}/stats`
+- Response `200`:
+```json
+{
+  "project_id": "uuid",
+  "counts_by_status": {
+    "todo": 1,
+    "in_progress": 1,
+    "done": 1
+  },
+  "counts_by_assignee": [
+    {
+      "assignee_id": "uuid",
+      "assignee_name": "Test User",
+      "count": 3
+    }
+  ]
+}
+```
+
+### Tasks
+1. `GET /projects/{project_id}/tasks`
+- Query params:
+  - `status` (optional: `todo` | `in_progress` | `done`)
+  - `assignee` (optional UUID)
+  - `page` (default `1`, min `1`)
+  - `limit` (default `20`, min `1`, max `100`)
+- Example:
+  - `GET /projects/{project_id}/tasks?status=todo&assignee=<user_uuid>&page=1&limit=20`
+- Response `200`:
+```json
+{
+  "tasks": [
+    {
+      "id": "uuid",
+      "title": "Seed task: todo",
+      "description": "Initial task in todo state",
+      "status": "todo",
+      "priority": "medium",
+      "project_id": "uuid",
+      "assignee_id": "uuid",
+      "creator_id": "uuid",
+      "due_date": "2026-04-13",
+      "created_at": "2026-04-10T00:00:00Z",
+      "updated_at": "2026-04-10T00:00:00Z"
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 1
+}
+```
+
+2. `POST /projects/{project_id}/tasks`
+- Request:
+```json
+{
+  "title": "Prepare API review notes",
+  "description": "Summarize endpoints and constraints",
+  "priority": "high",
+  "assignee_id": "<user_uuid>",
+  "due_date": "2026-04-20"
+}
+```
+- Response `201`: task object
+
+3. `PATCH /tasks/{task_id}`
+- Request (any subset):
+```json
+{
+  "status": "in_progress",
+  "priority": "medium",
+  "title": "Prepare API review notes v2"
+}
+```
+- Response `200`:
+```json
+{
+  "id": "uuid",
+  "title": "Prepare API review notes v2",
+  "description": "Summarize endpoints and constraints",
+  "status": "in_progress",
+  "priority": "medium",
+  "project_id": "uuid",
+  "assignee_id": "uuid",
+  "creator_id": "uuid",
+  "due_date": "2026-04-20",
+  "created_at": "2026-04-10T00:00:00Z",
+  "updated_at": "2026-04-10T01:00:00Z"
+}
+```
+
+4. `DELETE /tasks/{task_id}`
+- Response `204` (no body)
+
+### Error Contract
+- `400`
+```json
+{ "error": "validation failed", "fields": { "field_name": "reason" } }
+```
+- `401`
+```json
+{ "error": "unauthorized" }
+```
+- `403`
+```json
+{ "error": "forbidden" }
+```
+- `404`
+```json
+{ "error": "not found" }
+```
+
+## 7. What You’d Do With More Time
+- Add comprehensive automated tests for auth, permissions, filtering, pagination boundaries, and stats edge cases.
+- Add role-based access and clearer collaborator membership management at the project level.
+- Add API-level rate limiting and token rotation/refresh strategy.
+- Add CI pipeline (lint, tests, migration check) for every PR.
+- Add richer OpenAPI examples for every endpoint and error case.

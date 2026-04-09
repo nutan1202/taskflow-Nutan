@@ -51,13 +51,23 @@ class Task(Base):
 
     # Enum Fields
     status: Mapped[TaskStatus] = mapped_column(
-        Enum(TaskStatus, name="task_status", native_enum=False),
+        Enum(
+            TaskStatus,
+            name="task_status",
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
+            native_enum=False,
+        ),
         nullable=False,
         default=TaskStatus.TODO,
     )
 
     priority: Mapped[TaskPriority] = mapped_column(
-        Enum(TaskPriority, name="task_priority", native_enum=False),
+        Enum(
+            TaskPriority,
+            name="task_priority",
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
+            native_enum=False,
+        ),
         nullable=False,
         default=TaskPriority.MEDIUM,
     )

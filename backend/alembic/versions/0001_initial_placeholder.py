@@ -27,13 +27,13 @@ def upgrade() -> None:
 
     # Create task_status enum type
     task_status_enum = postgresql.ENUM(
-        "todo", "in_progress", "done", name="task_status", create_type=True
+        "todo", "in_progress", "done", name="task_status", create_type=False
     )
     task_status_enum.create(op.get_bind())
 
     # Create task_priority enum type
     task_priority_enum = postgresql.ENUM(
-        "low", "medium", "high", name="task_priority", create_type=True
+        "low", "medium", "high", name="task_priority", create_type=False
     )
     task_priority_enum.create(op.get_bind())
 
