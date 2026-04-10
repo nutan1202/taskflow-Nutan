@@ -5,6 +5,7 @@ This submission is **backend-only** and implements the TaskFlow API using FastAP
 
 Scope included in this submission:
 - JWT-based authentication (`register`, `login`, bearer-protected business routes)
+- JWT access tokens with fixed 24-hour expiry
 - Project APIs (list, create, detail, update, delete)
 - Task APIs (list/create under project, update/delete by task id)
 - Project stats API (`GET /projects/{project_id}/stats`)
@@ -34,8 +35,11 @@ What `docker compose up --build` does:
 - `api` entrypoint waits for DB, runs migrations, optionally seeds, then starts Uvicorn
 
 Optional overrides:
-- You can create a root `.env` file from `.env.example` only if you want to override defaults (ports, DB creds, JWT secret, seed behavior).
+- You can create a root `.env` file from `.env.example` only if you want to override defaults.
+- Override keys use the `TASKFLOW_*` prefix (for example `TASKFLOW_API_PUBLISH_PORT`, `TASKFLOW_POSTGRES_PASSWORD`, `TASKFLOW_JWT_SECRET`).
 - No `.env` file is required for first run.
+- If `5432` is already in use on your machine, run:
+  - `TASKFLOW_POSTGRES_PUBLISH_PORT=55432 docker compose up --build`
 
 Useful follow-up commands:
 ```bash
@@ -49,14 +53,14 @@ docker compose down -v
 Base URL after startup:
 - `http://localhost:8000`
 
-Interactive API docs after startup:
+API docs UI:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
 Auth model:
 - `POST /auth/register` and `POST /auth/login` are public
-- `GET /health` is public
-- All project/task/stats business endpoints require `Authorization: Bearer <token>`
+- `GET /health` is bearer-protected by design
+- All non-auth endpoints require `Authorization: Bearer <token>` to match assignment wording exactly
 
 ## 4. Running Migrations
 Automatic behavior on container start:
@@ -72,7 +76,7 @@ docker compose exec api alembic downgrade -1
 ```
 
 Seed behavior:
-- Controlled by `RUN_DB_SEED` in `.env` (default `true`)
+- Controlled by `TASKFLOW_RUN_DB_SEED` in optional root `.env` (default `true`)
 - When enabled, `python scripts/seed.py` runs on startup
 - Seed script is idempotent (safe across restarts; inserts only when missing)
 
@@ -85,8 +89,18 @@ Use these seeded credentials for reviewer login:
 ## 6. API Reference
 All responses are JSON.
 
+### Auth Behavior Notes
+- JWT includes `user_id` and `email` claims.
+- JWT expiry is hard-enforced to exactly 24 hours.
+- No refresh-token flow is included in this assignment submission.
+
+### JSON-Only Notes
+- API endpoints return JSON responses, including standardized error responses.
+- FastAPI documentation UIs are available at `/docs` and `/redoc` for reviewer convenience.
+
 ### Authorization Rules
-- All project/task/stats business endpoints require bearer authentication.
+- All non-auth endpoints require bearer authentication.
+- `GET /health` is intentionally protected to comply with the assignment rule above.
 - Project update/delete is owner-only.
 - Project detail, task listing, and project stats are accessible to users who own the project or have task membership in it.
 - Task delete is allowed only for project owner or task creator.
@@ -125,7 +139,7 @@ All responses are JSON.
 - Response `200`: same shape as register
 
 ### Health
-1. `GET /health` (public)
+1. `GET /health` (requires bearer token)
 - Response `200`:
 ```json
 { "status": "ok" }
