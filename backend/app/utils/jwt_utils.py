@@ -10,6 +10,8 @@ import jwt
 
 from app.core.config import get_settings
 
+ACCESS_TOKEN_EXPIRY_HOURS = 24
+
 
 @dataclass(frozen=True)
 class TokenClaims:
@@ -33,7 +35,6 @@ def create_access_token(
     *,
     user_id: str,
     email: str,
-    expires_in_hours: int | None = None,
 ) -> str:
     """
     Create a signed JWT access token.
@@ -49,8 +50,7 @@ def create_access_token(
 
     settings = get_settings()
     now = datetime.now(timezone.utc)
-    expiry_hours = expires_in_hours or settings.jwt_expiry_hours
-    expires_at = now + timedelta(hours=expiry_hours)
+    expires_at = now + timedelta(hours=ACCESS_TOKEN_EXPIRY_HOURS)
 
     payload: dict[str, Any] = {
         "user_id": user_id,

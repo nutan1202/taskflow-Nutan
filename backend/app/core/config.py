@@ -28,7 +28,6 @@ class Settings(BaseSettings):
     database_url: str = Field(min_length=1, validation_alias="DATABASE_URL")
     jwt_secret: SecretStr = Field(min_length=32, validation_alias="JWT_SECRET")
     jwt_algorithm: JwtAlgorithm = Field(validation_alias="JWT_ALGORITHM")
-    jwt_expiry_hours: int = Field(ge=1, le=168, validation_alias="JWT_EXPIRY_HOURS")
     bcrypt_rounds: int = Field(ge=12, le=16, validation_alias="BCRYPT_ROUNDS")
     seed_user_email: str = Field(min_length=3, validation_alias="SEED_USER_EMAIL")
     seed_user_password: SecretStr = Field(

@@ -6,8 +6,8 @@
 
 ## Quick Use
 1. Start backend:
-   - `cp .env.example .env`
    - `docker compose up --build`
+   - Optional: create `.env` from `.env.example` only if you want custom `TASKFLOW_*` overrides
 2. Import both files into Postman.
 3. Select environment: `TaskFlow Local`.
 4. Run in order:

@@ -19,11 +19,13 @@ os.environ["API_HOST"] = "127.0.0.1"
 os.environ["API_PORT"] = "8000"
 os.environ.setdefault(
     "DATABASE_URL",
-    "postgresql+psycopg://taskflow:taskflow@localhost:5432/taskflow_test",
+    os.environ.get(
+        "TASKFLOW_TEST_DATABASE_URL",
+        "postgresql+psycopg://taskflow:taskflow@localhost:5432/taskflow_test",
+    ),
 )
 os.environ["JWT_SECRET"] = "test-secret-at-least-32-characters-long"
 os.environ["JWT_ALGORITHM"] = "HS256"
-os.environ["JWT_EXPIRY_HOURS"] = "24"
 os.environ["BCRYPT_ROUNDS"] = "12"
 os.environ["SEED_USER_EMAIL"] = "test@example.com"
 os.environ["SEED_USER_PASSWORD"] = "password123"
