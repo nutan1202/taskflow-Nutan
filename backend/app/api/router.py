@@ -1,6 +1,6 @@
 """Aggregate API routers."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.api.deps import get_current_user
 from app.api.routes import auth, health, projects, tasks

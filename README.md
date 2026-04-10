@@ -25,7 +25,6 @@ Assumption: reviewer has **Docker + Docker Compose** installed.
 ```bash
 git clone https://github.com/nutan1202/taskflow-Nutan
 cd taskflow-Nutan
-cp .env.example .env
 docker compose up --build
 ```
 
@@ -33,6 +32,10 @@ What `docker compose up --build` does:
 - Starts `db` (PostgreSQL 16)
 - Builds and starts `api` (FastAPI)
 - `api` entrypoint waits for DB, runs migrations, optionally seeds, then starts Uvicorn
+
+Optional overrides:
+- You can create a root `.env` file from `.env.example` only if you want to override defaults (ports, DB creds, JWT secret, seed behavior).
+- No `.env` file is required for first run.
 
 Useful follow-up commands:
 ```bash
